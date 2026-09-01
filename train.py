@@ -11,7 +11,14 @@ import os
 import sys
 import time
 
-os.environ.setdefault("SDL_VIDEODRIVER", "x11")
+def _has_display():
+    """True when a real X11/Wayland display is available (not Colab/headless)."""
+    return bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
+
+
+# Headless (Colab): keep PyGame from crashing on display.open by using dummy.
+if not _has_display():
+    os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 import torch
 
@@ -63,6 +70,8 @@ def parse_args(argv):
 
 def make_renderer(grid_size, vision_radius):
     """Build a PyGame renderer lazily (creating a window is expensive)."""
+    if not _has_display():
+        return None  # headless: no window, just train
     from src.render import SnakeGame
     return SnakeGame(grid_size=grid_size, vision_radius=vision_radius)
 

@@ -14,7 +14,9 @@ Usage:
 import os
 import sys
 
-os.environ.setdefault("SDL_VIDEODRIVER", "x11")
+# Headless (Colab/CI): keep PyGame from crashing on display.open.
+if not (os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY")):
+    os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 import pygame
 
