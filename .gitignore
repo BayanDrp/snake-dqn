@@ -5,11 +5,6 @@ __pycache__/
 *.pth
 *.pt
 *.onnx
-*.pt
-img/
-plots/
-*.png
-*.gif
 *.log
 .idea/
 .vscode/

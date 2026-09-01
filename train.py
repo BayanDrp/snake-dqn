@@ -5,6 +5,7 @@ Usage:
     python train.py --episodes 3000       # more episodes
     python train.py --render-every 100    # pop a PyGame window every 100 episodes
     python train.py --save best.pth       # save the trained model
+    python train.py --log train_log.csv   # log (episode, reward, best) per episode
 """
 
 import os
@@ -40,6 +41,7 @@ def parse_args(argv):
         "save": "best_snake.pth",
         "log_every": 50,
         "max_steps": 500,
+        "log": "",          # CSV path: append (episode, reward, best) per episode
     }
     i = 0
     while i < len(argv):
@@ -60,6 +62,8 @@ def parse_args(argv):
             args["log_every"] = int(argv[i + 1]); i += 2
         elif a in ("--max-steps", "-m") and i + 1 < len(argv):
             args["max_steps"] = int(argv[i + 1]); i += 2
+        elif a == "--log" and i + 1 < len(argv):
+            args["log"] = argv[i + 1]; i += 2
         elif a in ("--help", "-h"):
             print(__doc__)
             sys.exit(0)
@@ -95,11 +99,21 @@ def main(argv=None):
     best_reward = float("-inf")
     start = time.time()
 
+    log_f = None
+    if args["log"]:
+        log_f = open(args["log"], "a")
+        if log_f.tell() == 0:
+            log_f.write("episode,reward,best\n")
+
     for episode in range(1, args["episodes"] + 1):
         total_reward = agent.train_episode()
 
         if total_reward > best_reward:
             best_reward = total_reward
+
+        if log_f is not None:
+            log_f.write(f"{episode},{total_reward:.4f},{best_reward:.4f}\n")
+            log_f.flush()
 
         # Periodically render the CURRENT model playing greedily
         if renderer and episode % args["render_every"] == 0:
@@ -127,6 +141,9 @@ def main(argv=None):
     # Final metric: greedy evaluation
     avg_reward = agent.evaluate(10)
     print(f"\nFinal greedy eval over 10 episodes: avg reward {avg_reward:.2f}")
+
+    if log_f is not None:
+        log_f.close()
 
     if args["save"]:
         torch.save(agent.model.state_dict(), args["save"])
