@@ -27,25 +27,27 @@ Verified DQN results on a trained model (100 games, greedy):
 pip install -r requirements.txt
 
 # Train the DQN agent (saves best_snake.pth)
-python scripts/train.py --episodes 5000
+python main.py train --episodes 5000
 
 # Test a trained model
-python scripts/test.py
+python main.py test
 
 # Watch the trained agent play
-python scripts/watch.py
+python main.py watch
 
 # Play yourself (human mode)
-python scripts/play.py
+python main.py play
 ```
+
+All commands also work directly via `scripts/train.py`, `scripts/test.py`, etc.
 
 ### Train on Google Colab (free GPU/CPU)
 
 ```python
 !git clone https://github.com/BayanDrp/snake-dqn.git
 %cd snake-dqn
-!python scripts/train.py --episodes 5000 --save best_snake.pth --log logs/training_log.csv
-!python scripts/test.py --model best_snake.pth --episodes 100
+!python main.py train --episodes 5000 --save best_snake.pth --log logs/training_log.csv
+!python main.py test --model best_snake.pth --episodes 100
 from google.colab import files
 files.download('best_snake.pth')
 files.download('logs/training_log.csv')
@@ -83,28 +85,23 @@ Expectation on Snake: DQN usually reaches good scores faster per episode because
 ## Structure
 
 ```
-game/env.py      # Snake world (gym-style: reset/step)
-game/render.py   # PyGame GUI renderer
-agent/           # DQN implementation
-  dqn.py         #   DQN network (MLP) + ε-greedy action selection
-  memory.py      #   Replay Buffer
-  agent.py       #   DQN agent: online + target net, Bellman update, training
-ppo/             # PPO scaffold — files empty, to be written
-  __init__.py
-  model.py       #   planned: Actor-Critic network (policy + value heads)
-  buffer.py      #   planned: on-policy rollout buffer + GAE computation
-  agent.py       #   planned: PPO trainer (clipped objective, entropy bonus)
-  train.py       #   planned: PPO training entry (same --log CSV format)
+main.py            # CLI entry point (train / watch / test / play)
+game/
+  env.py           # Snake world (gym-style: reset/step)
+  render.py        # PyGame GUI renderer
+dqn/
+  dqn.py           # DQN network (MLP) + ε-greedy action selection
+  memory.py        # Replay Buffer
+  agent.py         # DQN agent: online + target net, Bellman update, training
 scripts/
-  train.py       # DQN training loop (--log CSV, --render-every)
-  watch.py       # Watch trained agent
-  test.py        # Headless evaluation with metrics report
-  play.py        # Human playable
-  make_plot.py   # Learning curve from logs/*
-  compare.py     # planned: DQN vs PPO comparison plot
-  train_for_gif.sh  # Demo GIF renderer
-img/             # Demo GIFs + learning curve
-logs/            # Training data (training_log.csv)
+  train.py         # Training loop (--log CSV, --render-every)
+  watch.py         # Watch trained agent
+  test.py          # Headless evaluation with metrics report
+  play.py          # Human playable
+  make_plot.py     # Learning curve from logs/*
+  train_for_gif.sh # Demo GIF renderer
+img/               # Demo GIFs + learning curve
+logs/              # Training data (training_log.csv)
 ```
 
 ## Requirements

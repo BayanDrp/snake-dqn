@@ -50,7 +50,7 @@ import torch
 
 from game.env import SnakeEnv
 from game.render import SnakeGame
-from agent.agent import Agent
+from dqn.agent import Agent
 
 model = os.environ.get("PY_MODEL", "")
 out = os.environ["PY_OUT"]

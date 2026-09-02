@@ -21,7 +21,7 @@ if src_dir not in sys.path:
     sys.path.insert(0, src_dir)
 
 from game.env import SnakeEnv
-from agent.agent import Agent
+from dqn.agent import Agent
 
 
 def parse_args(argv):
