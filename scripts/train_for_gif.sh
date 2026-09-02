@@ -48,8 +48,8 @@ sys.path.insert(0, os.path.abspath("."))
 import pygame
 import torch
 
-from src.env import SnakeEnv
-from src.render import SnakeGame
+from game.env import SnakeEnv
+from game.render import SnakeGame
 from agent.agent import Agent
 
 model = os.environ.get("PY_MODEL", "")

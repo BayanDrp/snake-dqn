@@ -7,7 +7,7 @@ Output : PNG learning curve at img/learning_curve.png
 Uses matplotlib if available, otherwise falls back to a pure-PIL render.
 
 Usage:
-    python scripts/make_plot.py                 # reads training_log.csv -> img/learning_curve.png
+    python scripts/make_plot.py                 # reads logs/training_log.csv -> img/learning_curve.png
     python scripts/make_plot.py logs/a.csv out.png
 """
 
@@ -103,11 +103,11 @@ def plot_pil(eps, reward, best, out_path):
 
 
 def main(argv):
-    csv_path = argv[0] if argv else "training_log.csv"
+    csv_path = argv[0] if argv else os.path.join("logs", "training_log.csv")
     out_path = argv[1] if len(argv) > 1 else os.path.join("img", "learning_curve.png")
 
     if not os.path.exists(csv_path):
-        print(f"No log found at {csv_path}. Train with: python train.py --log training_log.csv")
+        print(f"No log found at {csv_path}. Train with: python scripts/train.py --log logs/training_log.csv")
         sys.exit(1)
 
     eps, reward, best = read_csv(csv_path)

@@ -27,16 +27,16 @@ Verified results on a trained model (100 games, greedy):
 pip install -r requirements.txt
 
 # Train the agent (saves best_snake.pth)
-python train.py --episodes 5000
+python scripts/train.py --episodes 5000
 
 # Test a trained model
-python test.py
+python scripts/test.py
 
 # Watch the trained agent play
-python watch.py
+python scripts/watch.py
 
 # Play yourself (human mode)
-python play.py
+python scripts/play.py
 ```
 
 ### Train on Google Colab (free GPU/CPU)
@@ -44,11 +44,11 @@ python play.py
 ```python
 !git clone https://github.com/BayanDrp/snake-dqn.git
 %cd snake-dqn
-!python train.py --episodes 5000 --save best_snake.pth --log training_log.csv
-!python test.py --model best_snake.pth --episodes 100
+!python scripts/train.py --episodes 5000 --save best_snake.pth --log logs/training_log.csv
+!python scripts/test.py --model best_snake.pth --episodes 100
 from google.colab import files
 files.download('best_snake.pth')
-files.download('training_log.csv')
+files.download('logs/training_log.csv')
 ```
 
 ## How It Works
@@ -61,16 +61,20 @@ files.download('training_log.csv')
 ## Structure
 
 ```
-src/env.py        # Snake world (gym-style: reset/step)
-src/render.py     # PyGame GUI renderer
-agent/dqn.py      # DQN network (MLP) + ε-greedy action selection
-agent/memory.py   # Replay Buffer
-agent/agent.py    # DQN agent: online + target net, Bellman update, training
-train.py          # Training loop (with --log CSV, --render-every)
-watch.py          # Watch trained agent
-test.py           # Headless evaluation with metrics report
-play.py           # Human playable
-scripts/          # make_plot.py (learning curve) + train_for_gif.sh (GIF demos)
+game/env.py      # Snake world (gym-style: reset/step)
+game/render.py   # PyGame GUI renderer
+agent/dqn.py     # DQN network (MLP) + ε-greedy action selection
+agent/memory.py  # Replay Buffer
+agent/agent.py   # DQN agent: online + target net, Bellman update, training
+scripts/
+  train.py       # Training loop (--log CSV, --render-every)
+  watch.py       # Watch trained agent
+  test.py        # Headless evaluation with metrics report
+  play.py        # Human playable
+  make_plot.py   # Learning curve from logs/*
+  train_for_gif.sh  # Demo GIF renderer
+img/             # Demo GIFs + learning curve
+logs/            # Training data (training_log.csv)
 ```
 
 ## Requirements

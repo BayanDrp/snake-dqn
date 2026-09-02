@@ -1,6 +1,6 @@
 import pygame
 import numpy as np
-from src.env import SnakeEnv, State
+from game.env import SnakeEnv, State
 
 # Constants
 width = 600

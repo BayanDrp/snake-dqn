@@ -1,11 +1,11 @@
 """Training entry point: train the DQN to play Snake, with optional live rendering.
 
 Usage:
-    python train.py                       # train headless (fast)
-    python train.py --episodes 3000       # more episodes
-    python train.py --render-every 100    # pop a PyGame window every 100 episodes
-    python train.py --save best.pth       # save the trained model
-    python train.py --log train_log.csv   # log (episode, reward, best) per episode
+    python scripts/train.py                       # train headless (fast)
+    python scripts/train.py --episodes 3000       # more episodes
+    python scripts/train.py --render-every 100    # pop a PyGame window every 100 episodes
+    python scripts/train.py --save best.pth       # save the trained model
+    python scripts/train.py --log logs/training_log.csv   # log (episode, reward, best) per episode
 """
 
 import os
@@ -23,11 +23,11 @@ if not _has_display():
 
 import torch
 
-src_dir = os.path.dirname(os.path.abspath(__file__))
+src_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if src_dir not in sys.path:
     sys.path.insert(0, src_dir)
 
-from src.env import SnakeEnv
+from game.env import SnakeEnv
 from agent.agent import Agent
 
 
@@ -76,7 +76,7 @@ def make_renderer(grid_size, vision_radius):
     """Build a PyGame renderer lazily (creating a window is expensive)."""
     if not _has_display():
         return None  # headless: no window, just train
-    from src.render import SnakeGame
+    from game.render import SnakeGame
     return SnakeGame(grid_size=grid_size, vision_radius=vision_radius)
 
 

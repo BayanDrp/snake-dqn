@@ -7,8 +7,8 @@ Controls:
     Q / ESC      -> quit
 
 Usage:
-    python play.py
-    python play.py --grid-size 15 --fps 10
+    python scripts/play.py
+    python scripts/play.py --grid-size 15 --fps 10
 """
 
 import os
@@ -20,12 +20,12 @@ if not (os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY")):
 
 import pygame
 
-src_dir = os.path.dirname(os.path.abspath(__file__))
+src_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if src_dir not in sys.path:
     sys.path.insert(0, src_dir)
 
-from src.env import SnakeEnv
-from src.render import SnakeGame
+from game.env import SnakeEnv
+from game.render import SnakeGame
 
 # In the env's convention actions are relative to the snake's direction:
 #   0 = turn left, 1 = straight, 2 = turn right

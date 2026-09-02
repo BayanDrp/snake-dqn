@@ -1,10 +1,10 @@
 """Watch a trained agent play Snake with the PyGame GUI (no training).
 
 Usage:
-    python watch.py                        # uses best_snake.pth
-    python watch.py --model my_model.pth
-    python watch.py --grid-size 12 --vision-radius 3 --fps 15
-    python watch.py --episodes 3
+    python scripts/watch.py                        # uses best_snake.pth
+    python scripts/watch.py --model my_model.pth
+    python scripts/watch.py --grid-size 12 --vision-radius 3 --fps 15
+    python scripts/watch.py --episodes 3
 """
 
 import os
@@ -16,12 +16,12 @@ if not (os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY")):
 
 import torch
 
-src_dir = os.path.dirname(os.path.abspath(__file__))
+src_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if src_dir not in sys.path:
     sys.path.insert(0, src_dir)
 
-from src.env import SnakeEnv
-from src.render import SnakeGame
+from game.env import SnakeEnv
+from game.render import SnakeGame
 from agent.agent import Agent
 
 
@@ -62,7 +62,7 @@ def main(argv=None):
 
     if not os.path.exists(args["model"]):
         print(f"Model not found: {args['model']}")
-        print("Train one first: python train.py --save best_snake.pth")
+        print("Train one first: python scripts/train.py --save best_snake.pth")
         sys.exit(1)
 
     env = SnakeEnv(grid_size=args["grid_size"], vision_radius=args["vision_radius"])

@@ -1,10 +1,10 @@
 """Evaluate a trained agent headlessly and report performance metrics.
 
 Usage:
-    python test.py                         # tests best_snake.pth, 100 episodes
-    python test.py --model my_model.pth
-    python test.py --episodes 500 --grid-size 12 --vision-radius 3
-    python test.py --render                # show live PyGame window while testing
+    python scripts/test.py                         # tests best_snake.pth, 100 episodes
+    python scripts/test.py --model my_model.pth
+    python scripts/test.py --episodes 500 --grid-size 12 --vision-radius 3
+    python scripts/test.py --render                # show live PyGame window while testing
 """
 
 import os
@@ -16,11 +16,11 @@ if not (os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY")):
 
 import torch
 
-src_dir = os.path.dirname(os.path.abspath(__file__))
+src_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if src_dir not in sys.path:
     sys.path.insert(0, src_dir)
 
-from src.env import SnakeEnv
+from game.env import SnakeEnv
 from agent.agent import Agent
 
 
@@ -64,7 +64,7 @@ def main(argv=None):
 
     if not os.path.exists(args["model"]):
         print(f"Model not found: {args['model']}")
-        print("Train one first: python train.py --save best_snake.pth")
+        print("Train one first: python scripts/train.py --save best_snake.pth")
         sys.exit(1)
 
     env = SnakeEnv(grid_size=args["grid_size"], vision_radius=args["vision_radius"])
@@ -73,7 +73,7 @@ def main(argv=None):
 
     renderer = None
     if args["render"]:
-        from src.render import SnakeGame
+        from game.render import SnakeGame
         import pygame
         renderer = SnakeGame(grid_size=args["grid_size"], vision_radius=args["vision_radius"])
         renderer.env = env
