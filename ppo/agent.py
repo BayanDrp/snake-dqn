@@ -4,9 +4,12 @@ from .memory import PPOMemory
 
 
 class PPOAgent:
-    def __init__(self, state_dim, action_dim, lr=0.0003):
-        self.actor = Actor(state_dim, action_dim)
-        self.critic = Critic(state_dim)
+    def __init__(self, state_dim, action_dim, lr=0.0003, device=None):
+        self.device = device or torch.device(
+            "cuda" if torch.cuda.is_available() else "cpu"
+        )
+        self.actor = Actor(state_dim, action_dim).to(self.device)
+        self.critic = Critic(state_dim).to(self.device)
 
         self.actor_optimizer = torch.optim.Adam(
             self.actor.parameters(), lr=lr
@@ -21,7 +24,7 @@ class PPOAgent:
             torch.tensor(state_vector, dtype=torch.float32),
             torch.tensor([state.direction], dtype=torch.float32),
         ])
-        return state_vector.unsqueeze(0)
+        return state_vector.unsqueeze(0).to(self.device)
 
     def select_action(self, state):
         state = self.state_to_tensor(state)
@@ -40,7 +43,7 @@ class PPOAgent:
 
         for _ in range(max_steps):
             action, log_prob, value = self.select_action(state)
-            state_vector = self.state_to_tensor(state).squeeze(0).numpy()
+            state_vector = self.state_to_tensor(state).squeeze(0).cpu().numpy()
             next_state, reward, done = env.step(action)
 
             memory.store(state_vector, action, reward, done, log_prob, value)
@@ -61,6 +64,11 @@ class PPOAgent:
 
     def update(self, memory, gamma=0.99, lam=0.95, batch_size=64):
         for state, action, log_prob, returns, advantages in memory.get_batches(batch_size):
+            state = state.to(self.device)
+            action = action.to(self.device)
+            log_prob = log_prob.to(self.device)
+            returns = returns.to(self.device)
+            advantages = advantages.to(self.device)
             self.update_actor(state, action, log_prob, advantages)
             self.update_critic(state, returns)
 

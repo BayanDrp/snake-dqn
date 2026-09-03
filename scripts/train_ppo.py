@@ -11,7 +11,9 @@ from ppo.agent import PPOAgent
 
 
 env = SnakeEnv(grid_size=12, vision_radius=3)
-agent = PPOAgent(state_dim=50, action_dim=3)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {device}")
+agent = PPOAgent(state_dim=50, action_dim=3, device=device)
 os.makedirs("logs", exist_ok=True)
 best = float("-inf")
 
