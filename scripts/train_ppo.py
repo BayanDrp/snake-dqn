@@ -36,7 +36,12 @@ def main(argv=None):
     args = parse_args(argv if argv is not None else sys.argv[1:])
     env = SnakeEnv(grid_size=12, vision_radius=3)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    agent = PPOAgent(state_dim=50, action_dim=3, device=device)
+    agent = PPOAgent(
+        state_dim=50,
+        action_dim=3,
+        device=device,
+        entropy_coef=0.02,
+    )
     print(f"Using device: {device}")
 
     os.makedirs(os.path.dirname(args["log"]) or ".", exist_ok=True)
@@ -48,7 +53,10 @@ def main(argv=None):
             reward = agent.train_episode(env, args["max_steps"])
             best = max(best, reward)
             log.writerow([episode, reward, best])
-            print(f"Episode {episode}/{args['episodes']}: reward = {reward:.2f}")
+            print(
+                f"Episode {episode}/{args['episodes']}: "
+                f"reward={reward:.2f}, score={env.score}"
+            )
 
     torch.save({
         "actor": agent.actor.state_dict(),
