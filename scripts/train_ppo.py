@@ -10,28 +10,52 @@ from game.env import SnakeEnv
 from ppo.agent import PPOAgent
 
 
-env = SnakeEnv(grid_size=12, vision_radius=3)
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"Using device: {device}")
-agent = PPOAgent(state_dim=50, action_dim=3, device=device)
-os.makedirs("logs", exist_ok=True)
-best = float("-inf")
+def parse_args(argv):
+    args = {
+        "episodes": 1000,
+        "max_steps": 500,
+        "save": "ppo_snake.pth",
+        "log": "logs/ppo_training_log.csv",
+    }
+    i = 0
+    while i < len(argv):
+        if argv[i] in ("--episodes", "-e"):
+            args["episodes"] = int(argv[i + 1]); i += 2
+        elif argv[i] in ("--max-steps", "-m"):
+            args["max_steps"] = int(argv[i + 1]); i += 2
+        elif argv[i] in ("--save", "-s"):
+            args["save"] = argv[i + 1]; i += 2
+        elif argv[i] == "--log":
+            args["log"] = argv[i + 1]; i += 2
+        else:
+            i += 1
+    return args
 
-with open("logs/ppo_training_log.csv", "w", newline="") as file:
-    log = csv.writer(file)
-    log.writerow(["episode", "reward", "best"])
 
-    for episode in range(1000):
-        reward = agent.train_episode(env, max_steps=500)
-        best = max(best, reward)
-        log.writerow([episode + 1, reward, best])
-        file.flush()
-        print(f"Episode {episode + 1}: reward = {reward:.2f}")
+def main(argv=None):
+    args = parse_args(argv if argv is not None else sys.argv[1:])
+    env = SnakeEnv(grid_size=12, vision_radius=3)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    agent = PPOAgent(state_dim=50, action_dim=3, device=device)
+    print(f"Using device: {device}")
 
-torch.save(
-    {
+    os.makedirs(os.path.dirname(args["log"]) or ".", exist_ok=True)
+    best = float("-inf")
+    with open(args["log"], "w", newline="") as file:
+        log = csv.writer(file)
+        log.writerow(["episode", "reward", "best"])
+        for episode in range(1, args["episodes"] + 1):
+            reward = agent.train_episode(env, args["max_steps"])
+            best = max(best, reward)
+            log.writerow([episode, reward, best])
+            print(f"Episode {episode}/{args['episodes']}: reward = {reward:.2f}")
+
+    torch.save({
         "actor": agent.actor.state_dict(),
         "critic": agent.critic.state_dict(),
-    },
-    "ppo_snake.pth",
-)
+    }, args["save"])
+    print(f"Model saved to {args['save']}")
+
+
+if __name__ == "__main__":
+    main()

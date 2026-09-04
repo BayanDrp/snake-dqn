@@ -4,12 +4,15 @@ from .memory import PPOMemory
 
 
 class PPOAgent:
-    def __init__(self, state_dim, action_dim, lr=0.0003, device=None):
+    def __init__(self, state_dim, action_dim, lr=0.0003, device=None,
+                 update_epochs=4, entropy_coef=0.01):
         self.device = device or torch.device(
             "cuda" if torch.cuda.is_available() else "cpu"
         )
         self.actor = Actor(state_dim, action_dim).to(self.device)
         self.critic = Critic(state_dim).to(self.device)
+        self.update_epochs = update_epochs
+        self.entropy_coef = entropy_coef
 
         self.actor_optimizer = torch.optim.Adam(
             self.actor.parameters(), lr=lr
@@ -63,14 +66,15 @@ class PPOAgent:
         return total_reward
 
     def update(self, memory, gamma=0.99, lam=0.95, batch_size=64):
-        for state, action, log_prob, returns, advantages in memory.get_batches(batch_size):
-            state = state.to(self.device)
-            action = action.to(self.device)
-            log_prob = log_prob.to(self.device)
-            returns = returns.to(self.device)
-            advantages = advantages.to(self.device)
-            self.update_actor(state, action, log_prob, advantages)
-            self.update_critic(state, returns)
+        for _ in range(self.update_epochs):
+            for state, action, log_prob, returns, advantages in memory.get_batches(batch_size):
+                state = state.to(self.device)
+                action = action.to(self.device)
+                log_prob = log_prob.to(self.device)
+                returns = returns.to(self.device)
+                advantages = advantages.to(self.device)
+                self.update_actor(state, action, log_prob, advantages)
+                self.update_critic(state, returns)
 
     def update_actor(self, state, action, old_log_prob, advantages):
         action_probs = self.actor(state)
@@ -83,6 +87,7 @@ class PPOAgent:
             torch.clamp(ratio, 1 - 0.2, 1 + 0.2) * advantages
         )
         actor_loss = -torch.min(surrogate1, surrogate2).mean()
+        actor_loss -= self.entropy_coef * dist.entropy().mean()
 
         self.actor_optimizer.zero_grad()
         actor_loss.backward()
