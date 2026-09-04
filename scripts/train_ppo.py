@@ -37,7 +37,7 @@ def main(argv=None):
     env = SnakeEnv(grid_size=12, vision_radius=3)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     agent = PPOAgent(
-        state_dim=50,
+        state_dim=53,
         action_dim=3,
         device=device,
         entropy_coef=0.02,

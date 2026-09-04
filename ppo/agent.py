@@ -1,4 +1,5 @@
 import torch
+import torch.nn.functional as F
 from .network import Actor, Critic
 from .memory import PPOMemory
 
@@ -22,17 +23,16 @@ class PPOAgent:
         )
 
     def state_to_tensor(self, state):
-        state_vector = state.vision.flatten()
-        state_vector = torch.cat([
-            torch.tensor(state_vector, dtype=torch.float32),
-            torch.tensor([state.direction], dtype=torch.float32),
-        ])
-        return state_vector.unsqueeze(0).to(self.device)
+        vision = torch.tensor(state.vision.flatten(), dtype=torch.float32) / 3.0
+        direction = F.one_hot(
+            torch.tensor(state.direction), num_classes=4
+        ).float()
+        return torch.cat([vision, direction]).unsqueeze(0).to(self.device)
 
     def select_action(self, state):
         state = self.state_to_tensor(state)
-        action_probs = self.actor(state)
-        dist = torch.distributions.Categorical(action_probs)
+        action_logits = self.actor(state)
+        dist = torch.distributions.Categorical(logits=action_logits)
         action = dist.sample()
         log_prob = dist.log_prob(action)
         value = self.critic(state)
@@ -77,8 +77,8 @@ class PPOAgent:
                 self.update_critic(state, returns)
 
     def update_actor(self, state, action, old_log_prob, advantages):
-        action_probs = self.actor(state)
-        dist = torch.distributions.Categorical(action_probs)
+        action_logits = self.actor(state)
+        dist = torch.distributions.Categorical(logits=action_logits)
         new_log_prob = dist.log_prob(action)
 
         ratio = torch.exp(new_log_prob - old_log_prob)

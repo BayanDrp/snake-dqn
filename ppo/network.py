@@ -12,7 +12,7 @@ class Actor(nn.Module):
     def forward(self, x):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        x = F.softmax(self.fc3(x), dim=-1)
+        x = self.fc3(x)
         return x
 
 class Critic(nn.Module):

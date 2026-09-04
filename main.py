@@ -6,6 +6,9 @@ Usage:
     python main.py train --episodes 3000       # more episodes
     python main.py train --log logs/log.csv    # write CSV per episode
 
+    python main.py train-ppo                   # train PPO (saves ppo_snake.pth)
+    python main.py train-ppo --episodes 3000
+
     python main.py watch                       # watch best_snake.pth
     python main.py watch --model my.pth        # watch a specific model
 
@@ -34,16 +37,18 @@ if not _has_display():
     os.environ["SDL_VIDEODRIVER"] = "dummy"
 
 from scripts.train import main as train_main
+from scripts.train_ppo import main as train_ppo_main
 from scripts.watch import main as watch_main
 from scripts.test import main as test_main
 from scripts.play import main as play_main
 
 
 COMMANDS = {
-    "train":  train_main,
-    "watch":  watch_main,
-    "test":   test_main,
-    "play":   play_main,
+    "train":     train_main,
+    "train-ppo": train_ppo_main,
+    "watch":     watch_main,
+    "test":      test_main,
+    "play":      play_main,
 }
 
 

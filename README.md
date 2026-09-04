@@ -29,6 +29,9 @@ pip install -r requirements.txt
 # Train the DQN agent (saves best_snake.pth)
 python main.py train --episodes 5000
 
+# Train the PPO agent (saves ppo_snake.pth)
+python main.py train-ppo --episodes 5000
+
 # Test a trained model
 python main.py test
 
@@ -47,10 +50,13 @@ All commands also work directly via `scripts/train.py`, `scripts/test.py`, etc.
 !git clone https://github.com/BayanDrp/snake-dqn.git
 %cd snake-dqn
 !python main.py train --episodes 5000 --save best_snake.pth --log logs/training_log.csv
+!python main.py train-ppo --episodes 5000 --save ppo_snake.pth --log logs/ppo_training_log.csv
 !python main.py test --model best_snake.pth --episodes 100
 from google.colab import files
 files.download('best_snake.pth')
+files.download('ppo_snake.pth')
 files.download('logs/training_log.csv')
+files.download('logs/ppo_training_log.csv')
 ```
 
 ## How It Works
@@ -63,9 +69,9 @@ files.download('logs/training_log.csv')
 
 Learn a Q-value per action → act greedily. Small MLP (vision + one-hot direction → Q-values), **replay buffer** (reuse old off-policy data), **target network** (stable Bellman targets), ε-greedy with linear decay.
 
-### PPO (policy-gradient) — coming next
+### PPO (policy-gradient) — implemented
 
-Plan: learn a direct policy π(a|s) → sample actions. **Actor-Critic** (shared trunk, actor head → action logits, critic head → V(s)), **GAE** (λ-weighted advantage estimation), **clipped objective** (limit update size), multi-epoch minibatch updates, entropy bonus for exploration. Scaffold lives in `ppo/` (empty, to be written).
+Policy gradient with Actor-Critic: separate Actor (policy) and Critic (value) networks, Categorical policy, clipped surrogate objective (ε=0.2), GAE advantages (λ=0.95), entropy bonus for exploration. On-policy: data used once then discarded.
 
 ## DQN vs PPO (the plan)
 
@@ -85,7 +91,7 @@ Expectation on Snake: DQN usually reaches good scores faster per episode because
 ## Structure
 
 ```
-main.py            # CLI entry point (train / watch / test / play)
+main.py            # CLI entry point (train / train-ppo / watch / test / play)
 game/
   env.py           # Snake world (gym-style: reset/step)
   render.py        # PyGame GUI renderer
@@ -93,15 +99,21 @@ dqn/
   dqn.py           # DQN network (MLP) + ε-greedy action selection
   memory.py        # Replay Buffer
   agent.py         # DQN agent: online + target net, Bellman update, training
+ppo/
+  network.py       # Actor (policy) + Critic (value) networks
+  memory.py        # On-policy rollout buffer + GAE
+  agent.py         # PPO agent: clipped objective, entropy bonus, training
 scripts/
-  train.py         # Training loop (--log CSV, --render-every)
+  train.py         # DQN training loop (--log CSV, --render-every)
+  train_ppo.py     # PPO training loop (--log CSV)
   watch.py         # Watch trained agent
   test.py          # Headless evaluation with metrics report
   play.py          # Human playable
-  make_plot.py     # Learning curve from logs/*
+  make_plot.py     # DQN learning curve from logs/*
+  make_plot_ppo.py # PPO learning curve from logs/*
   train_for_gif.sh # Demo GIF renderer
-img/               # Demo GIFs + learning curve
-logs/              # Training data (training_log.csv)
+img/               # Demo GIFs + learning curves
+logs/              # Training data (*_log.csv)
 ```
 
 ## Requirements
